@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080" # Exposes backend on host port 8080
+    volumes:
+      - ./backend/uploads:/root/uploads # Persist uploaded files
+      - ./backend-data:/root/data     # Persist SQLite database
+    # networks:
+      # - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80" # Exposes frontend on host port 3000 (Nginx serving on port 80 in container)
+    depends_on:
+      - backend
+    # networks:
+      # - app-network
+
+# networks:
+  # app-network:
+    # driver: bridge
