@@ -163,7 +163,7 @@ function App() {
       setTimeout(() => URL.revokeObjectURL(fileURL), 1000); // 1 second delay
 
     } catch (error) {
-      console.error('Error viewing document:', error);
+      console.error('Error viewing document:', error); // Keep this log
       const axiosError = error as AxiosError<{ message?: string, error?: string }>;
       let specificErrorMessage = 'Error viewing document.';
       if (axiosError.response && axiosError.response.data instanceof Blob &&
