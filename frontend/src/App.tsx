@@ -137,48 +137,47 @@ function App() {
     }
   };
 
-  const handleView = async (id: string, name: string) => { // Added name parameter
-    clearMessages();
+  const handleView = async (id: string, name: string) => {
+    clearMessages(); // Clear previous general messages
     try {
       const response = await axios.get(`${API_URL}/documents/${id}`, {
-        responseType: 'blob', // Important to handle file download
+        responseType: 'blob',
       });
-      // Ensure response.data is a Blob
+
       if (!(response.data instanceof Blob)) {
-        setErrorMessage('Received invalid data type for file download.');
-        console.error('Download error: response.data is not a Blob', response.data);
+        // This specific error should be displayed, not affect auth
+        setErrorMessage('Received invalid data type when trying to view the document.');
+        console.error('View error: response.data is not a Blob', response.data);
         return;
       }
-      const file = response.data; // Already a Blob
 
-      // Create a link element, click it to download/open
+      const file = response.data;
       const fileURL = URL.createObjectURL(file);
 
-      const link = document.createElement('a');
-      link.href = fileURL;
-      link.setAttribute('download', name); // Use the document name for the download
-      document.body.appendChild(link);
-      link.click();
+      // Attempt to open in a new tab
+      // For PDFs, most browsers will display them. For other types, behavior varies.
+      window.open(fileURL, '_blank');
 
-      // Clean up
-      document.body.removeChild(link);
-      URL.revokeObjectURL(fileURL);
+      // Revoke the object URL after a short delay to allow the new tab to load it.
+      // If revoked too soon, the new tab might not be able to access the blob.
+      setTimeout(() => URL.revokeObjectURL(fileURL), 1000); // 1 second delay
 
     } catch (error) {
-      console.error('Error viewing/downloading document:', error);
+      console.error('Error viewing document:', error);
       const axiosError = error as AxiosError<{ message?: string, error?: string }>;
-      // Attempt to parse error if response.data is a blob containing JSON error
+      let specificErrorMessage = 'Error viewing document.';
       if (axiosError.response && axiosError.response.data instanceof Blob &&
           axiosError.response.data.type && axiosError.response.data.type.toLowerCase().includes('application/json')) {
         try {
           const errorJson = JSON.parse(await axiosError.response.data.text());
-          setErrorMessage(errorJson.error || errorJson.message || 'Error viewing/downloading document.');
-        } catch (parseError) {
-          setErrorMessage('Error viewing/downloading document and failed to parse error response.');
-        }
-      } else {
-        setErrorMessage(axiosError.response?.data?.error || axiosError.response?.data?.message || 'Error viewing/downloading document.');
+          specificErrorMessage = errorJson.error || errorJson.message || specificErrorMessage;
+        } catch (parseError) { /* Keep default specificErrorMessage */ }
+      } else if (axiosError.response?.data?.error || axiosError.response?.data?.message) {
+        specificErrorMessage = axiosError.response.data.error || axiosError.response.data.message;
       }
+      setErrorMessage(specificErrorMessage); // Set the specific error message
+      // CRITICAL: Ensure this error handling does NOT clear the auth token or user state.
+      // The current setErrorMessage should not do that by itself.
     }
   };
 
