@@ -312,7 +312,10 @@ function App() {
             </div>
             <div className="category-filter-container">
               <button
-                onClick={() => setSelectedCategory('')}
+                onClick={() => {
+                  setSelectedCategory('');
+                  setUploadCategory(''); // Clear upload category when "All" is clicked
+                }}
                 className={selectedCategory === '' ? 'active-category' : ''}
               >
                 All Categories
@@ -320,7 +323,10 @@ function App() {
               {categories.map((cat) => (
                 <button
                   key={cat}
-                  onClick={() => setSelectedCategory(cat)}
+                  onClick={() => {
+                    setSelectedCategory(cat);
+                    setUploadCategory(cat); // Pre-populate upload category
+                  }}
                   className={selectedCategory === cat ? 'active-category' : ''}
                 >
                   {cat}
