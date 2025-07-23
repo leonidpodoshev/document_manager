@@ -1,0 +1,13 @@
+# Ignore the "logs" directory and all its contents
+logs/
+
+# Ignore all files and directories within "temp"
+temp/**
+
+# Ignore files with the .log extension
+*.log
+
+# Ignore a specific folder/file
+/Users/leo/Projects/doc_manager_jules/document_manager/backend-data/home_docs.db
+/Users/leo/Projects/doc_manager_jules/document_manager/backend/uploads
+
