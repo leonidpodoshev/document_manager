@@ -11,3 +11,4 @@ temp/**
 /Users/leo/Projects/doc_manager_jules/document_manager/backend-data/home_docs.db
 /Users/leo/Projects/doc_manager_jules/document_manager/backend/uploads
 
+# ignore files with .db and .pdf extension
