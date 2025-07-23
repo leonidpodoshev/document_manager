@@ -163,21 +163,30 @@ function App() {
       setTimeout(() => URL.revokeObjectURL(fileURL), 1000); // 1 second delay
 
     } catch (error) {
-      console.error('Error viewing document:', error); // Keep this log
+      console.error('Error viewing document:', error);
       const axiosError = error as AxiosError<{ message?: string, error?: string }>;
-      let specificErrorMessage = 'Error viewing document.';
-      if (axiosError.response && axiosError.response.data instanceof Blob &&
-          axiosError.response.data.type && axiosError.response.data.type.toLowerCase().includes('application/json')) {
-        try {
-          const errorJson = JSON.parse(await axiosError.response.data.text());
-          specificErrorMessage = errorJson.error || errorJson.message || specificErrorMessage;
-        } catch (parseError) { /* Keep default specificErrorMessage */ }
-      } else if (axiosError.response?.data?.error || axiosError.response?.data?.message) {
-        specificErrorMessage = axiosError.response.data.error || axiosError.response.data.message;
+      let finalErrorMessage = 'Error viewing document.'; // Default message
+
+      if (axiosError.response) {
+        // Handle case where error response is a blob that contains a JSON error message
+        if (axiosError.response.data instanceof Blob && axiosError.response.data.type?.toLowerCase().includes('application/json')) {
+          try {
+            const errorJson = JSON.parse(await axiosError.response.data.text());
+            finalErrorMessage = errorJson.error || errorJson.message || finalErrorMessage;
+          } catch (parseError) {
+            // Keep the default message if parsing the error blob fails
+          }
+        }
+        // Handle case where error response is already a JSON object
+        else if (axiosError.response.data) {
+          const data = axiosError.response.data;
+          // Ensure data is not a blob before trying to access properties
+          if (!(data instanceof Blob)) {
+            finalErrorMessage = data.error || data.message || finalErrorMessage;
+          }
+        }
       }
-      setErrorMessage(specificErrorMessage); // Set the specific error message
-      // CRITICAL: Ensure this error handling does NOT clear the auth token or user state.
-      // The current setErrorMessage should not do that by itself.
+      setErrorMessage(finalErrorMessage);
     }
   };
 
