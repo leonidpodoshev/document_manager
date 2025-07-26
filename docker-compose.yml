@@ -5,6 +5,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    image: plrbase/home-doc-backend:latest 
     ports:
       - "8081:8080" # Exposes backend on host port 8080
     volumes:
@@ -15,8 +16,9 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: ./frontend 
       dockerfile: Dockerfile
+    image: plrbase/home-doc-frontend:latest 
     ports:
       - "80:80" # Exposes frontend on host port 3000 (Nginx serving on port 80 in container)
     depends_on:
